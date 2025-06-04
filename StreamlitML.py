@@ -19,9 +19,6 @@ def nettoyer_texte(texte):
 # Charger les données
 df = pd.read_excel("produits_structures.xlsx")
 
-# Enlever " - PRIX UNITAIRE" dans la colonne 'Nom du produit'
-df['Nom du produit'] = df['Nom du produit'].str.replace(' - PRIX UNITAIRE', '', regex=False)
-
 # Nettoyer la colonne Description pour créer une nouvelle colonne
 df["Description_nettoyee"] = df["Description"].apply(nettoyer_texte)
 
@@ -41,4 +38,4 @@ if desc.strip():
     ax.axis("off")
     st.pyplot(fig)
 else:
-    st.warning("Aucune description disponible pour ce produit.")
+    st.warning("Aucune description disponible pour ce produit.") 
