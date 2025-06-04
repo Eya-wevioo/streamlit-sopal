@@ -17,8 +17,12 @@ def nettoyer_texte(texte):
     return texte
 
 # Charger les données
+<<<<<<< HEAD
 df = pd.read_excel(r"C:\Users\Eya jerbi\Desktop\PFESOPALDOSSIER\produits_structures.xlsx")
 
+=======
+df = pd.read_excel("produits_structures.xlsx")
+>>>>>>> 0e23b93 (Ajout des fichiers pour déploiement Streamlit)
 # Nettoyer la colonne Description pour créer une nouvelle colonne
 df["Description_nettoyee"] = df["Description"].apply(nettoyer_texte)
 
