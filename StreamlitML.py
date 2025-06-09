@@ -3,7 +3,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud
 import numpy as np
-import re
 import spacy
 
 # Initialisation de spaCy
@@ -52,51 +51,51 @@ mots_positifs = set([
 # 🎯 Interface Streamlit
 st.title("🌥️ Nuage de mots interactif - Produits industriels")
 
-# 📥 Chargement des données Excel
-try:
-    df = pd.read_excel("produits_structures.xlsx")
-except FileNotFoundError:
-    st.error("❌ Fichier 'produits_structures.xlsx' introuvable. Veuillez l'ajouter.")
-    st.stop()
+# 📥 Téléversement du fichier Excel
+uploaded_file = st.file_uploader("📁 Téléversez le fichier Excel des produits", type=["xlsx"])
+if uploaded_file is not None:
+    df = pd.read_excel(uploaded_file)
 
-# Nettoyage des champs
-df["Nom du produit"] = df["Nom du produit"].str.replace(' - PRIX UNITAIRE', '', regex=False)
-df["Description_nettoyee"] = df["Description"].fillna("").apply(nettoyer_texte)
+    # Nettoyage des champs
+    df["Nom du produit"] = df["Nom du produit"].str.replace(' - PRIX UNITAIRE', '', regex=False)
+    df["Description_nettoyee"] = df["Description"].fillna("").apply(nettoyer_texte)
 
-# Vérification présence colonne 'Matériau'
-if "Matériau" not in df.columns:
-    st.error("❌ Colonne 'Matériau' manquante dans le fichier Excel.")
-    st.stop()
+    # Vérification présence colonne 'Matériau'
+    if "Matériau" not in df.columns:
+        st.error("❌ Colonne 'Matériau' manquante dans le fichier Excel.")
+        st.stop()
 
-# Choix interactif
-produit = st.selectbox("🔍 Choisissez un produit :", df["Nom du produit"])
+    # Choix interactif
+    produit = st.selectbox("🔍 Choisissez un produit :", df["Nom du produit"])
 
-# Extraction
-row = df[df["Nom du produit"] == produit].iloc[0]
-desc = row["Description_nettoyee"]
-materiau = row["Matériau"]
+    # Extraction
+    row = df[df["Nom du produit"] == produit].iloc[0]
+    desc = row["Description_nettoyee"]
+    materiau = row["Matériau"]
 
-# Filtrage positif
-mots = [mot for mot in desc.split() if mot in mots_positifs]
-texte_filtre = " ".join(mots)
+    # Filtrage positif
+    mots = [mot for mot in desc.split() if mot in mots_positifs]
+    texte_filtre = " ".join(mots)
 
-# Affichage du nuage
-if texte_filtre.strip():
-    wc = WordCloud(
-        width=400, height=400,
-        background_color='white',
-        mask=create_circle_mask(400),
-        color_func=make_color_func(materiau),
-        contour_width=3,
-        contour_color='black',
-        collocations=False,
-        max_font_size=60,
-        relative_scaling=0.5
-    ).generate(texte_filtre)
+    # Affichage du nuage
+    if texte_filtre.strip():
+        wc = WordCloud(
+            width=400, height=400,
+            background_color='white',
+            mask=create_circle_mask(400),
+            color_func=make_color_func(materiau),
+            contour_width=3,
+            contour_color='black',
+            collocations=False,
+            max_font_size=60,
+            relative_scaling=0.5
+        ).generate(texte_filtre)
 
-    fig, ax = plt.subplots(figsize=(6, 6))
-    ax.imshow(wc, interpolation="bilinear")
-    ax.axis("off")
-    st.pyplot(fig)
+        fig, ax = plt.subplots(figsize=(6, 6))
+        ax.imshow(wc, interpolation="bilinear")
+        ax.axis("off")
+        st.pyplot(fig)
+    else:
+        st.warning("⚠️ Pas de mots positifs trouvés pour ce produit.")
 else:
-    st.warning("⚠️ Pas de mots positifs trouvés pour ce produit.")
+    st.info("📄 Veuillez téléverser un fichier Excel contenant les données produits.")
