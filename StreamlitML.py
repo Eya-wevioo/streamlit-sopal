@@ -5,22 +5,18 @@ from wordcloud import WordCloud, STOPWORDS
 import matplotlib.pyplot as plt
 import numpy as np
 
+# === Installation modèle SpaCy si nécessaire ===
 import spacy.cli
 try:
     spacy.load("fr_core_news_sm")
 except OSError:
     spacy.cli.download("fr_core_news_sm")
 
-<<<<<<< HEAD
-
-=======
->>>>>>> d8a319650dced240b092d569151d753af01cfe69
-# === Initialisation NLP ===
+# === Initialisation Streamlit ===
 st.set_page_config(page_title="Nuage de mots produits industriels", layout="centered")
 st.title("🌥️ Nuage de mots interactif - Produits industriels")
 
 @st.cache_resource
-
 def load_spacy_model():
     return spacy.load("fr_core_news_sm")
 
@@ -31,7 +27,7 @@ def load_data():
     df = pd.read_excel("produits_structures.xlsx")
     return df
 
-# === Nettoyage ===
+# === Nettoyage de texte ===
 def nettoyer_texte(text):
     doc = nlp(text.lower())
     tokens = []
@@ -42,8 +38,8 @@ def nettoyer_texte(text):
             tokens.append(token.lemma_)
     return " ".join(tokens)
 
-# === Masque circulaire ===
-def create_circle_mask(diameter=400):
+# === Masque circulaire réduit ===
+def create_circle_mask(diameter=300):
     x, y = np.ogrid[:diameter, :diameter]
     center = diameter / 2
     mask = (x - center) ** 2 + (y - center) ** 2 > (center) ** 2
@@ -57,12 +53,9 @@ def make_color_func(mat):
         'acier': 'grey',
         'laiton': 'goldenrod'
     }
-    color = color_map.get(mat, 'black')
-    def color_func(word, **kwargs):
-        return color
-    return color_func
+    return lambda word, **kwargs: color_map.get(mat, 'black')
 
-# === Affichage ===
+# === Affichage du nuage ===
 def afficher_nuage(texte, matiere, nom):
     mots_positifs = set([
         "haute", "résistance", "excellente", "robustesse", "performance",
@@ -73,20 +66,23 @@ def afficher_nuage(texte, matiere, nom):
     if not mots:
         st.info("Aucun mot positif identifié pour ce produit.")
         return
+
     texte_filtre = " ".join(mots)
+
     wc = WordCloud(
-        width=400, height=400,
+        width=300, height=300,
         background_color='white',
-        mask=create_circle_mask(400),
+        mask=create_circle_mask(300),
         color_func=make_color_func(matiere),
-        contour_width=2,
+        contour_width=1,
         contour_color='black',
         collocations=False,
-        max_font_size=50,
-        relative_scaling=0.5
+        max_font_size=30,
+        relative_scaling=0.3
     ).generate(texte_filtre)
+
     st.subheader(nom)
-    fig, ax = plt.subplots(figsize=(5, 5))
+    fig, ax = plt.subplots(figsize=(4, 4))
     ax.imshow(wc, interpolation='bilinear')
     ax.axis('off')
     st.pyplot(fig)
@@ -94,18 +90,19 @@ def afficher_nuage(texte, matiere, nom):
 # === Main ===
 df = load_data()
 
-# Nettoyage
+# Nettoyage de la colonne "Nom du produit"
 if 'Nom du produit' in df.columns:
     df['Nom du produit'] = df['Nom du produit'].str.replace(' - PRIX UNITAIRE', '', regex=False)
 else:
     st.error("Colonne 'Nom du produit' manquante dans le fichier Excel.")
 
+# Nettoyage de la description
 if 'Description' not in df.columns:
     st.error("Colonne 'Description' manquante dans le fichier Excel.")
 else:
     df['Description_nettoyee'] = df['Description'].fillna("").apply(nettoyer_texte)
 
-# Matériaux (supposition basée sur le nom du produit)
+# Détection du matériau à partir du nom
 def detecter_matiere(nom):
     nom = nom.lower()
     if 'alu' in nom:
@@ -120,7 +117,7 @@ def detecter_matiere(nom):
 if 'Matériau' not in df.columns:
     df['Matériau'] = df['Nom du produit'].apply(detecter_matiere)
 
-# Sélection produit
+# Sélection d’un produit
 produit_selectionne = st.selectbox("Sélectionnez un produit :", df['Nom du produit'].unique())
 
 produit = df[df['Nom du produit'] == produit_selectionne].iloc[0]
@@ -128,4 +125,5 @@ texte = produit['Description_nettoyee']
 matiere = produit['Matériau']
 nom = produit['Nom du produit']
 
+# Affichage du nuage de mots
 afficher_nuage(texte, matiere, nom)
