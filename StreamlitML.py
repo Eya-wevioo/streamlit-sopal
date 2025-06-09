@@ -11,10 +11,7 @@ try:
 except OSError:
     spacy.cli.download("fr_core_news_sm")
 
-<<<<<<< HEAD
 
-=======
->>>>>>> d8a319650dced240b092d569151d753af01cfe69
 # === Initialisation NLP ===
 st.set_page_config(page_title="Nuage de mots produits industriels", layout="centered")
 st.title("🌥️ Nuage de mots interactif - Produits industriels")
