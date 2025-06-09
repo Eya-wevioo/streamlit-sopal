@@ -5,12 +5,7 @@ from wordcloud import WordCloud, STOPWORDS
 import matplotlib.pyplot as plt
 import numpy as np
 
-# === Installation modèle SpaCy si nécessaire ===
-import spacy.cli
-try:
-    spacy.load("fr_core_news_sm")
-except OSError:
-    spacy.cli.download("fr_core_news_sm")
+import spacy
 
 # === Initialisation Streamlit ===
 st.set_page_config(page_title="Nuage de mots produits industriels", layout="centered")
