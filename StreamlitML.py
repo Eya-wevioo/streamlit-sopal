@@ -1,101 +1,101 @@
 import streamlit as st
 import pandas as pd
-import nltk
-from nltk.corpus import stopwords
-from wordcloud import WordCloud
+import spacy
+from wordcloud import WordCloud, STOPWORDS
 import matplotlib.pyplot as plt
 import numpy as np
-import string
 
-# === Première commande obligatoire ===
+# === Initialisation NLP ===
 st.set_page_config(page_title="Nuage de mots produits industriels", layout="centered")
-
-# === Télécharger les stopwords si besoin ===
-nltk.download('stopwords')
-
-# === Initialisation ===
 st.title("🌥️ Nuage de mots interactif - Produits industriels")
+
+@st.cache_resource
+
+def load_spacy_model():
+    return spacy.load("fr_core_news_sm")
+
+nlp = load_spacy_model()
 
 # === Chargement des données ===
 def load_data():
     df = pd.read_excel("produits_structures.xlsx")
     return df
 
-# === Nettoyage de texte (simple sans SpaCy) ===
+# === Nettoyage ===
 def nettoyer_texte(text):
-    mots = text.lower().split()
-    mots_nettoyes = [
-        mot.strip(string.punctuation)
-        for mot in mots
-        if mot not in stopwords.words('french') and mot.isalpha()
-    ]
-    return " ".join(mots_nettoyes)
+    doc = nlp(text.lower())
+    tokens = []
+    for token in doc:
+        if token.is_stop or token.is_punct:
+            continue
+        if token.is_alpha or token.like_num or any(char.isdigit() for char in token.text):
+            tokens.append(token.lemma_)
+    return " ".join(tokens)
 
 # === Masque circulaire ===
-def create_circle_mask(diameter=200):
+def create_circle_mask(diameter=400):
     x, y = np.ogrid[:diameter, :diameter]
     center = diameter / 2
     mask = (x - center) ** 2 + (y - center) ** 2 > (center) ** 2
     mask = 255 * mask.astype(int)
     return mask
 
-# === Couleur selon matériau ===
-def make_color_func(matiere):
+# === Palette des couleurs ===
+def make_color_func(mat):
     color_map = {
         'alu': 'blue',
         'acier': 'grey',
         'laiton': 'goldenrod'
     }
-    return lambda word, **kwargs: color_map.get(matiere, 'black')
+    color = color_map.get(mat, 'black')
+    def color_func(word, **kwargs):
+        return color
+    return color_func
 
-# === Affichage du nuage ===
+# === Affichage ===
 def afficher_nuage(texte, matiere, nom):
-    mots_positifs = {
+    mots_positifs = set([
         "haute", "résistance", "excellente", "robustesse", "performance",
         "fiable", "durable", "optimale", "facile", "idéale", "qualité", 
         "fiabilité", "robuste", "résistant", "élevée"
-    }
-    mots = [mot for mot in texte.split() if mot in mots_positifs]
+    ])
+    mots = [mot for mot in texte.lower().split() if mot in mots_positifs]
     if not mots:
         st.info("Aucun mot positif identifié pour ce produit.")
         return
-
     texte_filtre = " ".join(mots)
-
     wc = WordCloud(
-        width=200, height=200,
+        width=400, height=400,
         background_color='white',
-        mask=create_circle_mask(200),
+        mask=create_circle_mask(400),
         color_func=make_color_func(matiere),
-        contour_width=1,
+        contour_width=2,
         contour_color='black',
         collocations=False,
-        max_font_size=20,
+        max_font_size=50,
         relative_scaling=0.5
     ).generate(texte_filtre)
-
     st.subheader(nom)
-    fig, ax = plt.subplots(figsize=(3, 3))
+    fig, ax = plt.subplots(figsize=(5, 5))
     ax.imshow(wc, interpolation='bilinear')
     ax.axis('off')
     st.pyplot(fig)
 
-# === Chargement des données ===
+# === Main ===
 df = load_data()
 
-# Nettoyage nom produit
+# Nettoyage
 if 'Nom du produit' in df.columns:
     df['Nom du produit'] = df['Nom du produit'].str.replace(' - PRIX UNITAIRE', '', regex=False)
 else:
-    st.error("Colonne 'Nom du produit' manquante.")
+    st.error("Colonne 'Nom du produit' manquante dans le fichier Excel.")
 
-# Nettoyage description
 if 'Description' not in df.columns:
-    st.error("Colonne 'Description' manquante.")
+    st.error("Colonne 'Description' manquante dans le fichier Excel.")
 else:
     df['Description_nettoyee'] = df['Description'].fillna("").apply(nettoyer_texte)
 
-# Détecter matière
+# Matériaux (supposition basée sur le nom du produit)
 def detecter_matiere(nom):
     nom = nom.lower()
     if 'alu' in nom:
@@ -110,7 +110,7 @@ def detecter_matiere(nom):
 if 'Matériau' not in df.columns:
     df['Matériau'] = df['Nom du produit'].apply(detecter_matiere)
 
-# Sélection
+# Sélection produit
 produit_selectionne = st.selectbox("Sélectionnez un produit :", df['Nom du produit'].unique())
 
 produit = df[df['Nom du produit'] == produit_selectionne].iloc[0]
@@ -118,5 +118,4 @@ texte = produit['Description_nettoyee']
 matiere = produit['Matériau']
 nom = produit['Nom du produit']
 
-# Affichage
 afficher_nuage(texte, matiere, nom)
