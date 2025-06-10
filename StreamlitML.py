@@ -7,8 +7,8 @@ from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 
 # Configuration Streamlit
-st.set_page_config(page_title="Nuage de mots produits industriels", layout="centered")
-st.title("🌥️ Nuage de mots interactif - Produits industriels")
+st.set_page_config(page_title="Produits industriels", layout="centered")
+st.title("🌥️ Description des matériaux disponibles")
 
 # Télécharger stopwords français (une fois)
 nltk.download('stopwords')
@@ -100,7 +100,6 @@ else:
         collocations=False
     ).generate(texte_filtre)
     
-    st.subheader(f"Nuage de mots pour : {nom} ({matiere})")
     fig, ax = plt.subplots(figsize=(5, 5))
     ax.imshow(wc, interpolation='bilinear')
     ax.axis('off')
