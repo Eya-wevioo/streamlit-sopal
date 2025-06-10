@@ -137,7 +137,3 @@ with col2:
             st.write(f"- {p}")
     else:
         st.info(f"Aucun produit trouvé pour la catégorie '{categorie_choisie}'.")
-<<<<<<< HEAD
-=======
-
->>>>>>> 2bb2d01ddee228045d9b3cf893b63854db930b11
