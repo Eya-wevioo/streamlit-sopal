@@ -157,7 +157,6 @@ with col2:
 
     produits_filtres = df[df['Catégorie'] == categorie_choisie]['Nom du produit'].unique()
 
-    st.markdown("**🛒 Produits correspondants :**")
     if len(produits_filtres) > 0:
         for p in produits_filtres:
             st.write(f"- {p}")
