@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 # Configuration Streamlit
 st.set_page_config(page_title="Produits industriels", layout="centered")
-st.title("🌥️ Description des Produits industriels disponibles")
+st.title("🌥️ Description des matériaux disponibles")
 
 # Télécharger stopwords français (une fois)
 nltk.download('stopwords')
