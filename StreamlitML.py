@@ -100,9 +100,9 @@ else:
         collocations=False
     ).generate(texte_filtre)
     
-    st.markdown("---")  # ligne séparatrice
+    st.markdown("---")  # séparateur visuel
 
-col1, col2 = st.columns([2, 1])  # colonnes à gauche et droite
+col1, col2 = st.columns([2, 1])  # 2/3 gauche pour nuage, 1/3 droite pour filtre
 
 with col1:
     st.header("📋 Description des matériaux disponibles")
@@ -112,7 +112,7 @@ with col1:
     st.pyplot(fig)
 
 with col2:
-    st.header("📂 Filtrer les produits par matériau")
+    st.header("📦 Liste des produits par matériau")
 
     def classifier_materiau(nom):
         nom = nom.lower()
@@ -131,7 +131,7 @@ with col2:
 
     produits_filtres = df[df['Catégorie'] == categorie_choisie]['Nom du produit'].unique()
 
-    st.markdown("**Produits correspondants :**")
+    st.markdown("**🛒 Produits correspondants :**")
     if len(produits_filtres) > 0:
         for p in produits_filtres:
             st.write(f"- {p}")
