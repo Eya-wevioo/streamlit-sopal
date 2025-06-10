@@ -6,6 +6,12 @@ from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 import numpy as np
 
+# --- IMPORTANT : set_page_config doit être appelé en premier ---
+st.set_page_config(page_title="Nuage de mots produits industriels", layout="centered")
+
+# === Titre de la page ===
+st.title("🌥️ Nuage de mots interactif - Produits industriels")
+
 # === Chargement du modèle SpaCy avec cache et téléchargement automatique ===
 @st.cache_resource
 def load_spacy_model():
@@ -18,10 +24,6 @@ def load_spacy_model():
     return nlp
 
 nlp = load_spacy_model()
-
-# === Initialisation Streamlit ===
-st.set_page_config(page_title="Nuage de mots produits industriels", layout="centered")
-st.title("🌥️ Nuage de mots interactif - Produits industriels")
 
 # === Chargement des données ===
 @st.cache_data
