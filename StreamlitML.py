@@ -77,7 +77,8 @@ if 'Matériau' not in df.columns:
     df['Matériau'] = df['Nom du produit'].apply(detecter_matiere)
 
 # Sélection produit
-produit_selectionne = st.selectbox("Sélectionnez un produit :", df['Nom du produit'].unique())
+produit_selectionne = st.selectbox("Sélectionnez un produit :", df['Nom du produit'].unique(), key="produit_select")
+
 
 produit = df[df['Nom du produit'] == produit_selectionne].iloc[0]
 texte = produit['Description_nettoyee']
