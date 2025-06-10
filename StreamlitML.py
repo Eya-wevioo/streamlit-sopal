@@ -100,17 +100,43 @@ else:
         collocations=False
     ).generate(texte_filtre)
     
-    st.markdown("---")  # séparateur visuel
+    st.markdown("---")  # Séparateur visuel
 
-col1, col2 = st.columns([2, 1])  # 2/3 gauche pour nuage, 1/3 droite pour filtre
+# Disposition en deux colonnes : 2/3 gauche pour nuage, 1/3 droite pour filtre
+col1, col2 = st.columns([2, 1])
 
+# Colonne gauche : Nuage de mots
 with col1:
     st.header("📋 Description des matériaux disponibles")
-    fig, ax = plt.subplots(figsize=(5, 5))
-    ax.imshow(wc, interpolation='bilinear')
-    ax.axis('off')
-    st.pyplot(fig)
+    
+    # Sélection produit
+    produit_selectionne = st.selectbox("Sélectionnez un produit :", df['Nom du produit'].unique())
 
+    produit = df[df['Nom du produit'] == produit_selectionne].iloc[0]
+    texte = produit['Description_nettoyee']
+    matiere = produit['Matériau']
+    nom = produit['Nom du produit']
+
+    mots = set(texte.split()) & mots_positifs
+
+    if not mots:
+        st.info("Aucun mot positif identifié dans la description.")
+    else:
+        texte_filtre = " ".join(mots)
+        wc = WordCloud(
+            width=400, height=400,
+            background_color='white',
+            max_words=50,
+            color_func=lambda *args, **kwargs: color_map.get(matiere, 'black'),
+            collocations=False
+        ).generate(texte_filtre)
+        
+        fig, ax = plt.subplots(figsize=(5, 5))
+        ax.imshow(wc, interpolation='bilinear')
+        ax.axis('off')
+        st.pyplot(fig)
+
+# Colonne droite : Classification simple par matériau
 with col2:
     st.header("📦 Liste des produits par matériau")
 
@@ -127,11 +153,10 @@ with col2:
 
     df['Catégorie'] = df['Nom du produit'].apply(classifier_materiau)
 
-    categorie_choisie = st.selectbox("Choisissez un matériau :", ["acier", "alu", "laiton", "autre"])
+    categorie_choisie = st.selectbox("Choisissez un matériau :", ["acier", "alu", "laiton", "autre"], key="filtre_materiau")
 
     produits_filtres = df[df['Catégorie'] == categorie_choisie]['Nom du produit'].unique()
 
-    st.markdown("**🛒 Produits correspondants :**")
     if len(produits_filtres) > 0:
         for p in produits_filtres:
             st.write(f"- {p}")
