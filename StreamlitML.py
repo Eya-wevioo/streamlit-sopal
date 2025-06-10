@@ -5,17 +5,27 @@ from wordcloud import WordCloud, STOPWORDS
 import matplotlib.pyplot as plt
 import numpy as np
 
+import os
+import subprocess
 import spacy
+
+def download_spacy_model():
+    url = "https://github.com/explosion/spacy-models/releases/download/fr_core_news_sm-3.7.0/fr_core_news_sm-3.7.0-py3-none-any.whl"
+    filename = "fr_core_news_sm-3.7.0-py3-none-any.whl"
+    
+    if not os.path.exists(filename):
+        subprocess.run(["curl", "-L", url, "-o", filename], check=True)
+        subprocess.run(["pip", "install", filename], check=True)
+
+try:
+    nlp = spacy.load("fr_core_news_sm")
+except OSError:
+    download_spacy_model()
+    nlp = spacy.load("fr_core_news_sm")
 
 # === Initialisation Streamlit ===
 st.set_page_config(page_title="Nuage de mots produits industriels", layout="centered")
 st.title("🌥️ Nuage de mots interactif - Produits industriels")
-
-@st.cache_resource
-def load_spacy_model():
-    return spacy.load("fr_core_news_sm")
-
-nlp = load_spacy_model()
 
 # === Chargement des données ===
 def load_data():
