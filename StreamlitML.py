@@ -6,15 +6,17 @@ import string
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 
-# Configuration Streamlit
-st.set_page_config(page_title="Produits industriels", layout="centered")
-st.title("🌥️ Description des matériaux disponibles")
+# Configuration de la page
+st.set_page_config(page_title="Détails des matériaux", layout="wide")
 
-# Télécharger stopwords français (si nécessaire)
+# Titre principal
+st.title("📋 Détails des matériaux")
+
+# Télécharger les stopwords une fois
 nltk.download('stopwords')
 stop_words = set(stopwords.words('french'))
 
-# Nettoyage texte (minuscules, ponctuation, stopwords)
+# Fonction de nettoyage de texte
 def nettoyer_texte(text):
     if not isinstance(text, str):
         return ""
@@ -26,7 +28,7 @@ def nettoyer_texte(text):
     ]
     return " ".join(mots_nettoyes)
 
-# Détecter matériau pour la couleur
+# Détection du matériau
 def detecter_matiere(nom):
     nom = nom.lower()
     if 'alu' in nom:
@@ -38,7 +40,7 @@ def detecter_matiere(nom):
     else:
         return 'autre'
 
-# Palette couleurs par matériau
+# Couleurs personnalisées pour nuage de mots
 color_map = {
     'alu': 'blue',
     'acier': 'grey',
@@ -60,43 +62,38 @@ def load_data():
 
 df = load_data()
 
-# Nettoyage nom de produit
+# Nettoyage
 if 'Nom du produit' in df.columns:
     df['Nom du produit'] = df['Nom du produit'].str.replace(' - PRIX UNITAIRE', '', regex=False)
 else:
     st.error("Colonne 'Nom du produit' manquante.")
 
-# Nettoyage description
 if 'Description' in df.columns:
     df['Description_nettoyee'] = df['Description'].fillna("").apply(nettoyer_texte)
 else:
     st.error("Colonne 'Description' manquante.")
 
-# Détection matériau
 if 'Matériau' not in df.columns:
     df['Matériau'] = df['Nom du produit'].apply(detecter_matiere)
-
-# Section de sélection du produit
-produit_selectionne = st.selectbox("Sélectionnez un produit :", df['Nom du produit'].unique(), key="produit_select")
-
-# Récupération du produit sélectionné
-produit = df[df['Nom du produit'] == produit_selectionne].iloc[0]
-texte = produit['Description_nettoyee']
-matiere = produit['Matériau']
-
-# Extraction des mots positifs
-mots = set(texte.split()) & mots_positifs
-texte_filtre = " ".join(mots)
-
-# Séparateur visuel
-st.markdown("---")
 
 # Disposition en deux colonnes
 col1, col2 = st.columns([2, 1])
 
-# Colonne gauche : Nuage de mots
+# ----- 🧱 Colonne Gauche : Description et nuage -----
 with col1:
-    st.header("📋 Description des matériaux disponibles")
+    st.subheader("🔍 Sélection du produit")
+
+    produit_selectionne = st.selectbox("Choisissez un produit :", df['Nom du produit'].unique())
+    produit = df[df['Nom du produit'] == produit_selectionne].iloc[0]
+    texte = produit['Description_nettoyee']
+    matiere = produit['Matériau']
+    mots = set(texte.split()) & mots_positifs
+    texte_filtre = " ".join(mots)
+
+    st.markdown("**📝 Description nettoyée :**")
+    st.write(texte if texte else "_Aucune description disponible_")
+
+    st.markdown("**☁️ Nuage de mots qualitatifs :**")
     if not mots:
         st.info("Aucun mot positif identifié dans la description.")
     else:
@@ -113,9 +110,9 @@ with col1:
         ax.axis('off')
         st.pyplot(fig)
 
-# Colonne droite : Filtre des produits par matériau
+# ----- 🧱 Colonne Droite : Filtrage par matériau -----
 with col2:
-    st.header("📦 Liste des produits par matériau")
+    st.subheader("🧪 Filtrer les produits par matériau")
 
     def classifier_materiau(nom):
         nom = nom.lower()
@@ -129,12 +126,10 @@ with col2:
             return "autre"
 
     df['Catégorie'] = df['Nom du produit'].apply(classifier_materiau)
-
-    categorie_choisie = st.selectbox("Choisissez un matériau :", ["acier", "alu", "laiton", "autre"], key="filtre_materiau")
+    categorie_choisie = st.selectbox("Sélectionnez un matériau :", ["acier", "alu", "laiton", "autre"])
 
     produits_filtres = df[df['Catégorie'] == categorie_choisie]['Nom du produit'].unique()
 
-    st.markdown("**🛒 Produits correspondants :**")
     if len(produits_filtres) > 0:
         for p in produits_filtres:
             st.write(f"- {p}")
