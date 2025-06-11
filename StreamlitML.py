@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 st.set_page_config(page_title="Produits industriels", layout="centered")
 st.title("🌥️ Description des matériaux disponibles")
 
-# Télécharger stopwords français (une fois)
+# Télécharger stopwords français (si nécessaire)
 nltk.download('stopwords')
 stop_words = set(stopwords.words('french'))
 
@@ -46,84 +46,60 @@ color_map = {
     'autre': 'black'
 }
 
-# Liste de mots positifs à garder dans le nuage
+# Mots positifs à garder
 mots_positifs = {
     "haute", "résistance", "excellente", "robustesse", "performance",
     "fiable", "durable", "optimale", "facile", "idéale", "qualité", 
     "fiabilité", "robuste", "résistant", "élevée"
 }
 
-# Chargement données
+# Chargement des données
 @st.cache_data
 def load_data():
     return pd.read_excel("produits_structures.xlsx")
 
 df = load_data()
 
-# Nettoyage noms produits (suppression " - PRIX UNITAIRE")
+# Nettoyage nom de produit
 if 'Nom du produit' in df.columns:
     df['Nom du produit'] = df['Nom du produit'].str.replace(' - PRIX UNITAIRE', '', regex=False)
 else:
     st.error("Colonne 'Nom du produit' manquante.")
 
-# Nettoyage descriptions
+# Nettoyage description
 if 'Description' in df.columns:
     df['Description_nettoyee'] = df['Description'].fillna("").apply(nettoyer_texte)
 else:
     st.error("Colonne 'Description' manquante.")
 
-# Détection matériau (ajoute colonne 'Matériau' si absente)
+# Détection matériau
 if 'Matériau' not in df.columns:
     df['Matériau'] = df['Nom du produit'].apply(detecter_matiere)
 
-# Sélection produit
+# Section de sélection du produit
 produit_selectionne = st.selectbox("Sélectionnez un produit :", df['Nom du produit'].unique(), key="produit_select")
 
-
+# Récupération du produit sélectionné
 produit = df[df['Nom du produit'] == produit_selectionne].iloc[0]
 texte = produit['Description_nettoyee']
 matiere = produit['Matériau']
-nom = produit['Nom du produit']
 
-# Filtrer les mots positifs uniques
+# Extraction des mots positifs
 mots = set(texte.split()) & mots_positifs
+texte_filtre = " ".join(mots)
 
-if not mots:
-    st.info("Aucun mot positif identifié dans la description.")
-else:
-    texte_filtre = " ".join(mots)
-    
-    wc = WordCloud(
-        width=400, height=400,
-        background_color='white',
-        max_words=50,
-        color_func=lambda *args, **kwargs: color_map.get(matiere, 'black'),
-        collocations=False
-    ).generate(texte_filtre)
-    
-    st.markdown("---")  # Séparateur visuel
+# Séparateur visuel
+st.markdown("---")
 
-# Disposition en deux colonnes : 2/3 gauche pour nuage, 1/3 droite pour filtre
+# Disposition en deux colonnes
 col1, col2 = st.columns([2, 1])
 
 # Colonne gauche : Nuage de mots
 with col1:
     st.header("📋 Description des matériaux disponibles")
-    
-    # Sélection produit
-    produit_selectionne = st.selectbox("Sélectionnez un produit :", df['Nom du produit'].unique())
-
-    produit = df[df['Nom du produit'] == produit_selectionne].iloc[0]
-    texte = produit['Description_nettoyee']
-    matiere = produit['Matériau']
-    nom = produit['Nom du produit']
-
-    mots = set(texte.split()) & mots_positifs
-
     if not mots:
         st.info("Aucun mot positif identifié dans la description.")
     else:
-        texte_filtre = " ".join(mots)
         wc = WordCloud(
             width=400, height=400,
             background_color='white',
@@ -131,13 +107,13 @@ with col1:
             color_func=lambda *args, **kwargs: color_map.get(matiere, 'black'),
             collocations=False
         ).generate(texte_filtre)
-        
+
         fig, ax = plt.subplots(figsize=(5, 5))
         ax.imshow(wc, interpolation='bilinear')
         ax.axis('off')
         st.pyplot(fig)
 
-# Colonne droite : Classification simple par matériau
+# Colonne droite : Filtre des produits par matériau
 with col2:
     st.header("📦 Liste des produits par matériau")
 
