@@ -8,6 +8,20 @@ import matplotlib.pyplot as plt
 
 # Configuration de la page
 st.set_page_config(page_title="Détails des matériaux", layout="wide")
+st.markdown(
+    """
+    <style>
+    .stApp {
+        background-image: url('assets/backphoto.png');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
 
 # Titre principal
 st.title("📋 Détails des matériaux")
