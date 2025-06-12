@@ -11,17 +11,17 @@ st.set_page_config(page_title="Détails des matériaux", layout="wide")
 
 # --- Image de fond depuis GitHub ---
 background_url = "https://raw.githubusercontent.com/Eya-wevioo/streamlit-sopal/main/backphoto.png"
+
 st.markdown(f"""
     <style>
     .stApp {{
         background-image: url('{background_url}');
-        background-size: cover;
+        background-size: contain;  /* ou essaye aussi: 100% auto */
         background-position: center;
         background-repeat: no-repeat;
     }}
     </style>
 """, unsafe_allow_html=True)
-
 # --- Titre principal ---
 st.title("📋 Détails des matériaux")
 
@@ -113,24 +113,24 @@ with col1:
             st.info("Aucun mot positif identifié dans la description.")
         else:
             wc = WordCloud(
-                width=300,
-                height=150,
-                max_font_size=18,
-                background_color=None,  # transparent
-                mode="RGBA",
-                max_words=50,
-                color_func=lambda *args, **kwargs: color_map.get(matiere, 'black'),
-                collocations=False,
-                prefer_horizontal=1.0
-            ).generate(texte_filtre)
+    		width=200,
+    		height=100,
+   	 	max_font_size=20,  # mot petit
+    		background_color=None,
+    		mode="RGBA",
+    		max_words=30,
+    		color_func=lambda *args, **kwargs: color_map.get(matiere, 'black'),
+    		collocations=False,
+    		prefer_horizontal=1.0
+	    ).generate(texte_filtre)
 
-            st.markdown("""
-                <div style="border-radius: 20px; border: 2px solid navy; padding: 10px; background-color: rgba(255,255,255,0.05);">
-            """, unsafe_allow_html=True)
+st.markdown("""
+    <div style="border-radius: 20px; border: 2px solid navy; padding: 10px; background-color: rgba(255,255,255,0.05); display: inline-block;">
+""", unsafe_allow_html=True)
 
-            fig, ax = plt.subplots(figsize=(4, 2.5))
-            ax.imshow(wc, interpolation='bilinear')
-            ax.axis('off')
-            st.pyplot(fig)
+fig, ax = plt.subplots(figsize=(2.5, 1.2))  # cadre petit
+ax.imshow(wc, interpolation='bilinear')
+ax.axis('off')
+st.pyplot(fig)
 
-            st.markdown("</div>", unsafe_allow_html=True)
+st.markdown("</div>", unsafe_allow_html=True)
