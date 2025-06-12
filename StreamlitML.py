@@ -1,37 +1,41 @@
-import streamlit as st
+import streamlit as st 
 import pandas as pd
 import nltk
 from nltk.corpus import stopwords
 import string
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
+import base64
 
-# Configuration de la page
+# --- Configuration de la page ---
 st.set_page_config(page_title="Détails des matériaux", layout="wide")
-st.markdown(
-    """
-    <style>
-    .stApp {
-        background-image: url('assets/backphoto.png');
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
 
+# --- Fonction pour appliquer un fond d'écran ---
+def set_background(image_path):
+    with open(image_path, "rb") as image_file:
+        encoded = base64.b64encode(image_file.read()).decode()
+        css = f"""
+        <style>
+        .stApp {{
+            background-image: url("data:image/png;base64,{encoded}");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }}
+        </style>
+        """
+        st.markdown(css, unsafe_allow_html=True)
 
-# Titre principal
+set_background("backphoto.png")  # Mets l'image directement dans le dossier du script .py
+
+# --- Titre principal ---
 st.title("📋 Détails des matériaux")
 
-# Télécharger les stopwords une seule fois
+# --- Téléchargement des stopwords une seule fois ---
 nltk.download('stopwords')
 stop_words = set(stopwords.words('french'))
 
 # --- Fonctions ---
-
 def nettoyer_texte(text):
     if not isinstance(text, str):
         return ""
@@ -71,7 +75,7 @@ mots_positifs = {
 def load_data():
     return pd.read_excel("produits_structures.xlsx")
 
-# --- Données ---
+# --- Chargement des données ---
 df = load_data()
 
 if 'Nom du produit' in df.columns:
@@ -87,7 +91,6 @@ else:
 if 'Matériau' not in df.columns:
     df['Matériau'] = df['Nom du produit'].apply(detecter_matiere)
 
-# Catégorie produit
 df['Catégorie'] = df['Nom du produit'].apply(detecter_matiere)
 
 # --- Interface principale ---
@@ -116,17 +119,24 @@ with col1:
             st.info("Aucun mot positif identifié dans la description.")
         else:
             wc = WordCloud(
-                width=100,
-                height=100,
+                width=400,
+                height=200,
+                max_font_size=30,
                 background_color='white',
                 max_words=50,
                 color_func=lambda *args, **kwargs: color_map.get(matiere, 'black'),
                 collocations=False,
-                prefer_horizontal=1.0,
-                font_path=None
+                prefer_horizontal=1.0
             ).generate(texte_filtre)
 
-            fig, ax = plt.subplots(figsize=(3, 3))
+            # Encadrer joliment le nuage
+            st.markdown("""
+                <div style="border: 1px solid #ccc; padding: 10px; border-radius: 10px; background-color: #f9f9f9;">
+            """, unsafe_allow_html=True)
+
+            fig, ax = plt.subplots(figsize=(5, 3))
             ax.imshow(wc, interpolation='bilinear')
             ax.axis('off')
             st.pyplot(fig)
+
+            st.markdown("</div>", unsafe_allow_html=True)
