@@ -99,6 +99,8 @@ with col2:
     st.markdown(f"**🛒 {len(produits_filtrés)} produit(s) disponible(s) :**")
     produit_selectionne = st.radio("Cliquez sur un produit :", produits_filtrés, index=0 if produits_filtrés.size > 0 else None)
 
+# Modifiez cette partie dans votre code (section avec col1):
+
 with col1:
     if produit_selectionne:
         st.markdown("""<span class='colored-text' style='color: rgb(0, 104, 201); font-size: 20px;'>☁️ Description</span>""", unsafe_allow_html=True)
@@ -113,24 +115,33 @@ with col1:
             st.info("Aucun mot positif identifié dans la description.")
         else:
             wc = WordCloud(
-                width=300,
-                height=150,
-                max_font_size=20,
+                width=600,  # Optimisé pour le conteneur
+                height=300,
+                max_font_size=40,  # Taille réduite
+                min_font_size=6,   # Plus petit
                 background_color=None,
                 mode="RGBA",
-                max_words=50,
+                max_words=80,     # Nombre optimal
                 color_func=lambda *args, **kwargs: color_map.get(matiere, 'black'),
                 collocations=False,
-                prefer_horizontal=1.0
+                prefer_horizontal=0.85,
+                scale=1.5,         # Qualité équilibrée
+                relative_scaling=0.5  # Meilleure répartition
             ).generate(texte_filtre)
 
-            fig, ax = plt.subplots(figsize=(3, 1.5))
+            fig, ax = plt.subplots(figsize=(8, 4))
             ax.imshow(wc, interpolation='bilinear')
             ax.axis('off')
+            plt.tight_layout(pad=0)  # Supprime les marges
 
-            with st.container():
-                st.markdown("""
-                    <div style="display: flex; justify-content: center; align-items: center; border-radius: 20px; border: 2px solid navy; padding: 10px; background-color: rgba(255,255,255,0.05); width: fit-content; margin-top: 10px;">
-                """, unsafe_allow_html=True)
-                st.pyplot(fig)
-                st.markdown("</div>", unsafe_allow_html=True)
+            st.markdown("""
+                <div style="border-radius: 15px; border: 2px solid #1a73e8; 
+                padding: 15px; background-color: rgba(255,255,255,0.05); 
+                width: 100%; height: 300px; margin: 10px 0; 
+                display: flex; justify-content: center; align-items: center;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+            """, unsafe_allow_html=True)
+            
+            st.pyplot(fig, use_container_width=True)
+            
+            st.markdown("</div>", unsafe_allow_html=True)
