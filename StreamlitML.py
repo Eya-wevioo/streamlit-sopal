@@ -113,19 +113,14 @@ with col1:
         if not mots:
             st.info("Aucun mot positif identifié dans la description.")
         else:
-            wc = WordCloud(
-                width=300,
-                height=150,
-                max_font_size=20,
-                background_color=None,
-                mode="RGBA",
-                max_words=50,
-                color_func=lambda *args, **kwargs: color_map.get(matiere, 'black'),
-                collocations=False,
-                prefer_horizontal=1.0
-            ).generate(texte_filtre)
-
-            fig, ax = plt.subplots(figsize=(3, 1.5))
+           wc = WordCloud(
+    width=200,
+    height=100,
+    max_font_size=14,
+    min_font_size=6,
+    max_words=30
+)
+figsize=(2, 1)
             ax.imshow(wc, interpolation='bilinear')
             ax.axis('off')
             plt.tight_layout(pad=0)
