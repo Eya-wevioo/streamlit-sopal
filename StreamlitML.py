@@ -128,13 +128,20 @@ with col1:
             fig, ax = plt.subplots(figsize=(3, 1.5))
             ax.imshow(wc, interpolation='bilinear')
             ax.axis('off')
+            plt.tight_layout(pad=0)
 
             buffer = io.BytesIO()
-            fig.savefig(buffer, format='png', bbox_inches='tight', transparent=True)
+            fig.savefig(buffer, format='png', bbox_inches='tight', pad_inches=0, transparent=True)
             buffer.seek(0)
+            plt.close(fig)
 
             st.markdown("""
-                <div style="display: flex; justify-content: center; align-items: center; border-radius: 15px; border: 2px solid #004080; padding: 10px; background-color: rgba(255, 255, 255, 0.05); margin-top: 10px;">
+                <div style="display: flex; justify-content: center; align-items: center; 
+                border-radius: 15px; border: 2px solid #004080; padding: 10px; 
+                background-color: rgba(255, 255, 255, 0.05); width: 300px; 
+                height: 180px; margin-top: 10px; overflow: hidden;">
             """, unsafe_allow_html=True)
-            st.image(buffer, use_column_width=False)
+            
+            st.image(buffer, use_container_width=True)  # Correction ici : remplacement de use_column_width
+            
             st.markdown("</div>", unsafe_allow_html=True)
