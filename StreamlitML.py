@@ -136,5 +136,5 @@ with col1:
             st.markdown("""
                 <div style="display: flex; justify-content: center; align-items: center; border-radius: 15px; border: 2px solid #004080; padding: 10px; background-color: rgba(255, 255, 255, 0.05); margin-top: 10px;">
             """, unsafe_allow_html=True)
-            st.image(buffer, use_container_width=True)  # Correction ici : remplacement de use_column_width
+            st.image(buffer, use_column_width=False)
             st.markdown("</div>", unsafe_allow_html=True)
