@@ -129,12 +129,8 @@ with col1:
             ax.imshow(wc, interpolation='bilinear')
             ax.axis('off')
 
-            buffer = io.BytesIO()
-            fig.savefig(buffer, format='png', bbox_inches='tight', transparent=True)
-            buffer.seek(0)
-
             st.markdown("""
                 <div style="display: flex; justify-content: center; align-items: center; border-radius: 15px; border: 2px solid #004080; padding: 10px; background-color: rgba(255, 255, 255, 0.05); margin-top: 10px;">
             """, unsafe_allow_html=True)
-            st.image(buffer, use_column_width=False)
+            st.pyplot(fig)
             st.markdown("</div>", unsafe_allow_html=True)
