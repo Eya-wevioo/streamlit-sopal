@@ -106,38 +106,52 @@ with col1:
         st.markdown("""<span style='color: #1a73e8; font-size: 16px;'>☁️ Mots-clés positifs</span>""", 
                    unsafe_allow_html=True)
 
+        # Préparation des données
         ligne = df[df['Nom du produit'] == produit_selectionne].iloc[0]
         texte = ligne['Description_nettoyee']
-        matiere = ligne['Matériau']
         mots = set(texte.split()) & mots_positifs
         texte_filtre = " ".join(mots)
 
         if not mots:
             st.info("Aucun mot positif trouvé")
         else:
-            # Conteneur ultra-compact
-            st.markdown("""
-                <div style="border:1px solid #1a73e8; border-radius:10px; 
-                padding:10px; background:rgba(255,255,255,0.03); 
-                width:250px; height:150px; margin-top:5px;">
-            """, unsafe_allow_html=True)
+            # ========== DÉBUT DU CADRE ==========
+            container = st.container()
+            with container:
+                # Style CSS du cadre bleu
+                st.markdown("""
+                    <style>
+                        .wordcloud-container {
+                            border: 1px solid #1a73e8;
+                            border-radius: 10px;
+                            padding: 10px;
+                            width: 250px;
+                            height: 150px;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            background: rgba(255,255,255,0.03);
+                        }
+                    </style>
+                    <div class="wordcloud-container">
+                """, unsafe_allow_html=True)
 
-            # WordCloud miniature
-            wc = WordCloud(
-                width=200, 
-                height=100,
-                max_font_size=14,  # Mots très petits
-                min_font_size=5,
-                background_color=None,
-                mode="RGBA",
-                max_words=20,     # Très peu de mots
-                scale=1
-            ).generate(texte_filtre)
+                # Génération du WordCloud
+                wc = WordCloud(
+                    width=200,
+                    height=100,
+                    max_font_size=14,
+                    background_color=None,
+                    mode="RGBA"
+                ).generate(texte_filtre)
 
-            fig, ax = plt.subplots(figsize=(2.5, 1.25))  # Taille miniature
-            ax.imshow(wc, interpolation='bilinear')
-            ax.axis('off')
-            plt.tight_layout(pad=0)
-            
-            st.pyplot(fig)
-            st.markdown("</div>", unsafe_allow_html=True)
+                # Affichage CONTENU dans le cadre
+                fig, ax = plt.subplots(figsize=(2.5, 1.25))
+                ax.imshow(wc, interpolation='bilinear')
+                ax.axis('off')
+                plt.tight_layout(pad=0)
+                
+                st.pyplot(fig, use_container_width=True)  # <-- Clé magique ici
+                
+                st.markdown("</div>", unsafe_allow_html=True)
+            # ========== FIN DU CADRE ==========
