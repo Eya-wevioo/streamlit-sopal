@@ -101,9 +101,7 @@ with col2:
 
 with col1:
     if produit_selectionne:
-        st.markdown("""
-            <h3 style='color: rgb(0, 104, 201);'>☁️ Description</h3>
-        """, unsafe_allow_html=True)
+        st.markdown("""<span class='colored-text' style='color: rgb(0, 104, 201); font-size: 20px;'>☁️ Description</span>""", unsafe_allow_html=True)
 
         ligne = df[df['Nom du produit'] == produit_selectionne].iloc[0]
         texte = ligne['Description_nettoyee']
@@ -115,9 +113,9 @@ with col1:
             st.info("Aucun mot positif identifié dans la description.")
         else:
             wc = WordCloud(
-                width=800,
-                height=400,
-                max_font_size=80,
+                width=300,
+                height=150,
+                max_font_size=20,
                 background_color=None,
                 mode="RGBA",
                 max_words=50,
@@ -126,13 +124,13 @@ with col1:
                 prefer_horizontal=1.0
             ).generate(texte_filtre)
 
-            st.markdown("""
-                <div style="border-radius: 20px; border: 2px solid navy; padding: 10px; background-color: rgba(255,255,255,0.05); display: flex; justify-content: center;">
-            """, unsafe_allow_html=True)
-
-            fig, ax = plt.subplots(figsize=(8, 4))
+            fig, ax = plt.subplots(figsize=(3, 1.5))
             ax.imshow(wc, interpolation='bilinear')
             ax.axis('off')
-            st.pyplot(fig)
 
-            st.markdown("</div>", unsafe_allow_html=True)
+            with st.container():
+                st.markdown("""
+                    <div style="display: flex; justify-content: center; align-items: center; border-radius: 20px; border: 2px solid navy; padding: 10px; background-color: rgba(255,255,255,0.05); width: fit-content; margin-top: 10px;">
+                """, unsafe_allow_html=True)
+                st.pyplot(fig)
+                st.markdown("</div>", unsafe_allow_html=True)
