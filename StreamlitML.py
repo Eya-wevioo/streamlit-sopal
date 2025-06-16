@@ -103,8 +103,7 @@ with col2:
 
 with col1:
     if produit_selectionne:
-        st.markdown("""<span style='color: #1a73e8; font-size: 18px;'>☁️ Mots-clés positifs</span>""", 
-                   unsafe_allow_html=True)
+        st.markdown("""<span class='colored-text' style='color: rgb(0, 104, 201); font-size: 20px;'>☁️ Description</span>""", unsafe_allow_html=True)
 
         ligne = df[df['Nom du produit'] == produit_selectionne].iloc[0]
         texte = ligne['Description_nettoyee']
@@ -113,35 +112,30 @@ with col1:
         texte_filtre = " ".join(mots)
 
         if not mots:
-            st.info("Aucun mot positif identifié")
+            st.info("Aucun mot positif identifié dans la description.")
         else:
-            # Création du cadre bleu FIRST
-            with st.container():
-                st.markdown("""
-                    <div style="border:1px solid #1a73e8; border-radius:10px;
-                    padding:15px; background:rgba(255,255,255,0.03);
-                    width:100%; height:200px; margin:10px 0;
-                    display:flex; justify-content:center; align-items:center;">
-                """, unsafe_allow_html=True)
+            wc = WordCloud(
+                width=300,
+                height=150,
+                max_font_size=20,
+                background_color=None,
+                mode="RGBA",
+                max_words=50,
+                color_func=lambda *args, **kwargs: color_map.get(matiere, 'black'),
+                collocations=False,
+                prefer_horizontal=1.0
+            ).generate(texte_filtre)
 
-                # WordCloud compact
-                wc = WordCloud(
-                    width=250,
-                    height=150,
-                    max_font_size=16,
-                    min_font_size=6,
-                    background_color=None,
-                    mode="RGBA",
-                    max_words=30,
-                    color_func=lambda *args, **kwargs: color_map.get(matiere, 'black'),
-                    prefer_horizontal=0.9
-                ).generate(texte_filtre)
+            fig, ax = plt.subplots(figsize=(3, 1.5))
+            ax.imshow(wc, interpolation='bilinear')
+            ax.axis('off')
 
-                fig, ax = plt.subplots(figsize=(2.5, 1.5))
-                ax.imshow(wc, interpolation='bilinear')
-                ax.axis('off')
-                plt.tight_layout(pad=0)
-                
-                st.pyplot(fig, use_container_width=True)
-                
-                st.markdown("</div>", unsafe_allow_html=True)
+            buffer = io.BytesIO()
+            fig.savefig(buffer, format='png', bbox_inches='tight', transparent=True)
+            buffer.seek(0)
+
+            st.markdown("""
+                <div style="display: flex; justify-content: center; align-items: center; border-radius: 15px; border: 2px solid #004080; padding: 10px; background-color: rgba(255, 255, 255, 0.05); margin-top: 10px;">
+            """, unsafe_allow_html=True)
+            st.image(buffer, use_column_width=False)
+            st.markdown("</div>", unsafe_allow_html=True)
