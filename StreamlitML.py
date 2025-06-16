@@ -9,19 +9,19 @@ import matplotlib.pyplot as plt
 # --- Configuration de la page ---
 st.set_page_config(page_title="Détails des matériaux", layout="wide")
 
-# --- Image de fond depuis GitHub ---
+# --- Image de fond depuis GitHub (ajustée) ---
 background_url = "https://raw.githubusercontent.com/Eya-wevioo/streamlit-sopal/main/backphoto.png"
-
 st.markdown(f"""
     <style>
     .stApp {{
         background-image: url('{background_url}');
-        background-size: contain;  /* ou essaye aussi: 100% auto */
-        background-position: center;
+        background-size: contain;
+        background-position: top center;
         background-repeat: no-repeat;
     }}
     </style>
 """, unsafe_allow_html=True)
+
 # --- Titre principal ---
 st.title("📋 Détails des matériaux")
 
@@ -101,7 +101,7 @@ with col2:
 
 with col1:
     if produit_selectionne:
-        st.subheader(":blue[☁️ Description]")
+        st.subheader("<span class='colored-text' style='color: rgb(0, 104, 201);'>☁️ Description</span>", unsafe_allow_html=True)
 
         ligne = df[df['Nom du produit'] == produit_selectionne].iloc[0]
         texte = ligne['Description_nettoyee']
@@ -113,24 +113,24 @@ with col1:
             st.info("Aucun mot positif identifié dans la description.")
         else:
             wc = WordCloud(
-    		width=200,
-    		height=100,
-   	 	max_font_size=20,  # mot petit
-    		background_color=None,
-    		mode="RGBA",
-    		max_words=30,
-    		color_func=lambda *args, **kwargs: color_map.get(matiere, 'black'),
-    		collocations=False,
-    		prefer_horizontal=1.0
-	    ).generate(texte_filtre)
+                width=200,
+                height=100,
+                max_font_size=15,
+                background_color=None,
+                mode="RGBA",
+                max_words=50,
+                color_func=lambda *args, **kwargs: color_map.get(matiere, 'black'),
+                collocations=False,
+                prefer_horizontal=1.0
+            ).generate(texte_filtre)
 
-st.markdown("""
-    <div style="border-radius: 20px; border: 2px solid navy; padding: 10px; background-color: rgba(255,255,255,0.05); display: inline-block;">
-""", unsafe_allow_html=True)
+            st.markdown("""
+                <div style="border-radius: 20px; border: 2px solid navy; padding: 5px; background-color: rgba(255,255,255,0.05); width: fit-content;">
+            """, unsafe_allow_html=True)
 
-fig, ax = plt.subplots(figsize=(2.5, 1.2))  # cadre petit
-ax.imshow(wc, interpolation='bilinear')
-ax.axis('off')
-st.pyplot(fig)
+            fig, ax = plt.subplots(figsize=(2.5, 1.5))
+            ax.imshow(wc, interpolation='bilinear')
+            ax.axis('off')
+            st.pyplot(fig)
 
-st.markdown("</div>", unsafe_allow_html=True)
+            st.markdown("</div>", unsafe_allow_html=True)
