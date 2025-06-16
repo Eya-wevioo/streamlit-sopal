@@ -103,7 +103,8 @@ with col2:
 
 with col1:
     if produit_selectionne:
-        st.markdown("""<span class='colored-text' style='color: rgb(0, 104, 201); font-size: 20px;'>☁️ Description</span>""", unsafe_allow_html=True)
+        st.markdown("""<span style='color: #1a73e8; font-size: 16px;'>☁️ Mots-clés positifs</span>""", 
+                   unsafe_allow_html=True)
 
         ligne = df[df['Nom du produit'] == produit_selectionne].iloc[0]
         texte = ligne['Description_nettoyee']
@@ -112,36 +113,31 @@ with col1:
         texte_filtre = " ".join(mots)
 
         if not mots:
-            st.info("Aucun mot positif identifié dans la description.")
+            st.info("Aucun mot positif trouvé")
         else:
+            # Conteneur ultra-compact
+            st.markdown("""
+                <div style="border:1px solid #1a73e8; border-radius:10px; 
+                padding:10px; background:rgba(255,255,255,0.03); 
+                width:250px; height:150px; margin-top:5px;">
+            """, unsafe_allow_html=True)
+
+            # WordCloud miniature
             wc = WordCloud(
-                width=600,  # Optimisé pour le conteneur
-                height=300,
-                max_font_size=40,  # Taille réduite
-                min_font_size=6,   # Plus petit
+                width=200, 
+                height=100,
+                max_font_size=14,  # Mots très petits
+                min_font_size=5,
                 background_color=None,
                 mode="RGBA",
-                max_words=80,     # Nombre optimal
-                color_func=lambda *args, **kwargs: color_map.get(matiere, 'black'),
-                collocations=False,
-                prefer_horizontal=0.85,
-                scale=1.5,         # Qualité équilibrée
-                relative_scaling=0.5  # Meilleure répartition
+                max_words=20,     # Très peu de mots
+                scale=1
             ).generate(texte_filtre)
 
-            fig, ax = plt.subplots(figsize=(8, 4))
+            fig, ax = plt.subplots(figsize=(2.5, 1.25))  # Taille miniature
             ax.imshow(wc, interpolation='bilinear')
             ax.axis('off')
-            plt.tight_layout(pad=0)  # Supprime les marges
-
-            st.markdown("""
-                <div style="border-radius: 15px; border: 2px solid #1a73e8; 
-                padding: 15px; background-color: rgba(255,255,255,0.05); 
-                width: 100%; height: 300px; margin: 10px 0; 
-                display: flex; justify-content: center; align-items: center;
-                box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-            """, unsafe_allow_html=True)
+            plt.tight_layout(pad=0)
             
-            st.pyplot(fig, use_container_width=True)
-            
+            st.pyplot(fig)
             st.markdown("</div>", unsafe_allow_html=True)
