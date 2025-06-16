@@ -15,8 +15,8 @@ st.markdown(f"""
     <style>
     .stApp {{
         background-image: url('{background_url}');
-        background-size: contain;
-        background-position: top center;
+        background-size: cover;
+        background-position: center;
         background-repeat: no-repeat;
     }}
     </style>
@@ -101,7 +101,9 @@ with col2:
 
 with col1:
     if produit_selectionne:
-        st.subheader("<span class='colored-text' style='color: rgb(0, 104, 201);'>☁️ Description</span>", unsafe_allow_html=True)
+        st.markdown("""
+            <h3 style='color: rgb(0, 104, 201);'>☁️ Description</h3>
+        """, unsafe_allow_html=True)
 
         ligne = df[df['Nom du produit'] == produit_selectionne].iloc[0]
         texte = ligne['Description_nettoyee']
@@ -113,9 +115,9 @@ with col1:
             st.info("Aucun mot positif identifié dans la description.")
         else:
             wc = WordCloud(
-                width=200,
-                height=100,
-                max_font_size=15,
+                width=800,
+                height=400,
+                max_font_size=80,
                 background_color=None,
                 mode="RGBA",
                 max_words=50,
@@ -125,10 +127,10 @@ with col1:
             ).generate(texte_filtre)
 
             st.markdown("""
-                <div style="border-radius: 20px; border: 2px solid navy; padding: 5px; background-color: rgba(255,255,255,0.05); width: fit-content;">
+                <div style="border-radius: 20px; border: 2px solid navy; padding: 10px; background-color: rgba(255,255,255,0.05); display: flex; justify-content: center;">
             """, unsafe_allow_html=True)
 
-            fig, ax = plt.subplots(figsize=(2.5, 1.5))
+            fig, ax = plt.subplots(figsize=(8, 4))
             ax.imshow(wc, interpolation='bilinear')
             ax.axis('off')
             st.pyplot(fig)
