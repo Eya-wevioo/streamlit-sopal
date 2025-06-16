@@ -5,6 +5,7 @@ from nltk.corpus import stopwords
 import string
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
+import io
 
 # --- Configuration de la page ---
 st.set_page_config(page_title="Détails des matériaux", layout="wide")
@@ -99,59 +100,41 @@ with col2:
     st.markdown(f"**🛒 {len(produits_filtrés)} produit(s) disponible(s) :**")
     produit_selectionne = st.radio("Cliquez sur un produit :", produits_filtrés, index=0 if produits_filtrés.size > 0 else None)
 
-# Modifiez cette partie dans votre code (section avec col1):
-
 with col1:
     if produit_selectionne:
-        st.markdown("""<span style='color: #1a73e8; font-size: 16px;'>☁️ Mots-clés positifs</span>""", 
-                   unsafe_allow_html=True)
+        st.markdown("""<span class='colored-text' style='color: rgb(0, 104, 201); font-size: 20px;'>☁️ Description</span>""", unsafe_allow_html=True)
 
-        # Préparation des données
         ligne = df[df['Nom du produit'] == produit_selectionne].iloc[0]
         texte = ligne['Description_nettoyee']
+        matiere = ligne['Matériau']
         mots = set(texte.split()) & mots_positifs
         texte_filtre = " ".join(mots)
 
         if not mots:
-            st.info("Aucun mot positif trouvé")
+            st.info("Aucun mot positif identifié dans la description.")
         else:
-            # ========== DÉBUT DU CADRE ==========
-            container = st.container()
-            with container:
-                # Style CSS du cadre bleu
-                st.markdown("""
-                    <style>
-                        .wordcloud-container {
-                            border: 1px solid #1a73e8;
-                            border-radius: 10px;
-                            padding: 10px;
-                            width: 250px;
-                            height: 150px;
-                            display: flex;
-                            justify-content: center;
-                            align-items: center;
-                            background: rgba(255,255,255,0.03);
-                        }
-                    </style>
-                    <div class="wordcloud-container">
-                """, unsafe_allow_html=True)
+            wc = WordCloud(
+                width=300,
+                height=150,
+                max_font_size=20,
+                background_color=None,
+                mode="RGBA",
+                max_words=50,
+                color_func=lambda *args, **kwargs: color_map.get(matiere, 'black'),
+                collocations=False,
+                prefer_horizontal=1.0
+            ).generate(texte_filtre)
 
-                # Génération du WordCloud
-                wc = WordCloud(
-                    width=200,
-                    height=100,
-                    max_font_size=14,
-                    background_color=None,
-                    mode="RGBA"
-                ).generate(texte_filtre)
+            fig, ax = plt.subplots(figsize=(3, 1.5))
+            ax.imshow(wc, interpolation='bilinear')
+            ax.axis('off')
 
-                # Affichage CONTENU dans le cadre
-                fig, ax = plt.subplots(figsize=(2.5, 1.25))
-                ax.imshow(wc, interpolation='bilinear')
-                ax.axis('off')
-                plt.tight_layout(pad=0)
-                
-                st.pyplot(fig, use_container_width=True)  # <-- Clé magique ici
-                
-                st.markdown("</div>", unsafe_allow_html=True)
-            # ========== FIN DU CADRE ==========
+            buffer = io.BytesIO()
+            fig.savefig(buffer, format='png', bbox_inches='tight', transparent=True)
+            buffer.seek(0)
+
+            st.markdown("""
+                <div style="display: flex; justify-content: center; align-items: center; border-radius: 15px; border: 2px solid #004080; padding: 10px; background-color: rgba(255, 255, 255, 0.05); margin-top: 10px;">
+            """, unsafe_allow_html=True)
+            st.image(buffer, use_column_width=False)
+            st.markdown("</div>", unsafe_allow_html=True)
