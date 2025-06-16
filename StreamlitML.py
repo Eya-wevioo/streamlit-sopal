@@ -114,9 +114,9 @@ with col1:
             st.info("Aucun mot positif identifié dans la description.")
         else:
             wc = WordCloud(
-                width=250,
-                height=120,
-                max_font_size=16,
+                width=300,
+                height=150,
+                max_font_size=20,
                 background_color=None,
                 mode="RGBA",
                 max_words=50,
@@ -125,16 +125,16 @@ with col1:
                 prefer_horizontal=1.0
             ).generate(texte_filtre)
 
-            fig, ax = plt.subplots(figsize=(2.5, 1.2))
+            fig, ax = plt.subplots(figsize=(3, 1.5))
             ax.imshow(wc, interpolation='bilinear')
             ax.axis('off')
 
-            with st.container():
-                st.markdown("""
-                    <div style="display: flex; justify-content: center; align-items: center; 
-                                 border-radius: 15px; border: 2px solid #004080; 
-                                 padding: 10px; background-color: rgba(255, 255, 255, 0.05); 
-                                 margin-top: 10px; width: fit-content;">
-                """, unsafe_allow_html=True)
-                st.pyplot(fig, use_container_width=False)
-                st.markdown("</div>", unsafe_allow_html=True)
+            buffer = io.BytesIO()
+            fig.savefig(buffer, format='png', bbox_inches='tight', transparent=True)
+            buffer.seek(0)
+
+            st.markdown("""
+                <div style="display: flex; justify-content: center; align-items: center; border-radius: 15px; border: 2px solid #004080; padding: 10px; background-color: rgba(255, 255, 255, 0.05); margin-top: 10px;">
+            """, unsafe_allow_html=True)
+            st.image(buffer, use_column_width=False)
+            st.markdown("</div>", unsafe_allow_html=True)
